@@ -5,9 +5,15 @@ from app.db_functions import Chamados, session
 
 
 @app.route('/')
+@app.route('/login')
+def login():
+    return render_template('login.html')
+
+
 @app.route('/index')
 def index():
     return render_template('index.html')
+
 
 @app.route('/novo_chamado', methods=['POST'])
 def novo_chamado():
@@ -20,7 +26,7 @@ def novo_chamado():
     session.add(chamado)
     session.commit()
     id = chamado.numero
-    consulta = session.query(Chamados).filter(Chamados.numero==id).first()
+    consulta = session.query(Chamados).filter(Chamados.numero == id).first()
 
     return f'''
         Chamado numero..... {consulta.numero}\n
