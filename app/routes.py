@@ -27,7 +27,7 @@ def novo_chamado():
     session.commit()
     id = chamado.numero
     consulta = session.query(Chamados).filter(Chamados.numero == id).first()
-
+    session.close()
     return f'''
         Chamado numero..... {consulta.numero}\n
         Data Abertura...... {consulta.data_abertura}\n
