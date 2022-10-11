@@ -3,10 +3,25 @@ from flask import render_template
 from flask import request
 from app.db_functions import Chamados, session
 
+from app.wps import *
+
 
 @app.route('/')
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+
+        data = {
+            "username": email,
+            "password": password}
+
+        res = wpslogin(data)
+
+        return f'''
+        Protocolo {res.contrato}\n'''
+
     return render_template('login.html')
 
 
