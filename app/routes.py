@@ -19,8 +19,12 @@ def login():
 
         res = wpslogin(data)
 
-        return f'''
-        Protocolo {res.contrato}\n'''
+        if res.status_code == 200:
+            result = res.json()
+            return render_template('index.html', email=email, contrato=result['contrato'], cnpj=result['cnpj'], razao_social=result['razao_social'])
+        else:
+            err = 'Dados incorretos, tente novamente'
+            return render_template('login.html', erro=err)
 
     return render_template('login.html')
 

@@ -24,21 +24,21 @@
                     <li class="list-group-item d-flex justify-content-between lh-sm">
                         <div>
                             <h6 class="my-0">Número WPS</h6>
-                            <small class="text-muted">6232418193</small>
+                            <small class="text-muted">{{contrato}}</small>
                         </div>
 
                     </li>
                     <li class="list-group-item d-flex justify-content-between lh-sm">
                         <div>
                             <h6 class="my-0">Razão Social</h6>
-                            <small class="text-muted">Blob ltda.</small>
+                            <small class="text-muted">{{razao_social}}</small>
                         </div>
 
                     </li>
                     <li class="list-group-item d-flex justify-content-between lh-sm">
                         <div>
                             <h6 class="my-0">CNPJ</h6>
-                            <small class="text-muted">97.799.904/0001-60</small>
+                            <small class="text-muted">{{cnpj}}</small>
                         </div>
 
                     </li>
@@ -81,7 +81,7 @@
                         <div class="col-12">
                             <label for="email" class="form-label">Email para contato<span
                                     class="text-muted"></span></label>
-                            <input type="email" class="form-control" id="email" name="email" placeholder="" required>
+                            <input type="email" class="form-control" id="email" name="email" value="{{email}}" required>
 
                         </div>
 

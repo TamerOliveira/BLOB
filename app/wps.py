@@ -8,4 +8,4 @@ def wpslogin(data):
 
     request = requests.post(url=url, json=data)
 
-    return request.json()
+    return request
