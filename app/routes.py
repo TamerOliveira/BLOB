@@ -1,9 +1,11 @@
 from app import app
-from flask import render_template
-from flask import request
-from app.db_functions import Chamados, session
+from flask import (Flask, render_template, request, redirect, url_for, session)
+from app.db_functions import Chamados, session as dbsession
 
 from app.wps import *
+
+app.secret_key = 'super secret key'
+app.config['SESSION_TYPE'] = 'filesystem'
 
 
 @app.route('/')
@@ -21,6 +23,8 @@ def login():
 
         if res.status_code == 200:
             result = res.json()
+            contrato = result['contrato']
+            session["user"] = contrato
             return render_template('index.html', email=email, contrato=result['contrato'], cnpj=result['cnpj'], razao_social=result['razao_social'])
         else:
             err = 'Dados incorretos, tente novamente'
@@ -31,7 +35,17 @@ def login():
 
 @app.route('/index')
 def index():
-    return render_template('index.html')
+    if "user" in session:
+        user = session["user"]
+        return render_template('index.html', email=user)
+    else:
+        return redirect('login')
+
+
+@app.route("/logout")
+def logout():
+    session.pop("user", None)
+    return redirect("/")
 
 
 @app.route('/novo_chamado', methods=['POST'])
@@ -42,11 +56,11 @@ def novo_chamado():
     resumo = request.form.get('resumo')
     descricao = request.form.get('descricao')
     chamado = Chamados(tipo, responsavel, email, resumo, descricao)
-    session.add(chamado)
-    session.commit()
+    dbsession.add(chamado)
+    dbsession.commit()
     id = chamado.numero
-    consulta = session.query(Chamados).filter(Chamados.numero == id).first()
-    session.close()
+    consulta = dbsession.query(Chamados).filter(Chamados.numero == id).first()
+    dbsession.close()
     return f'''
         Chamado numero..... {consulta.numero}\n
         Data Abertura...... {consulta.data_abertura}\n
