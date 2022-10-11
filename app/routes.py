@@ -1,5 +1,6 @@
 from app import app
-from flask import (Flask, render_template, request, redirect, url_for, session)
+from flask import (Flask, render_template, request,
+                   redirect, url_for, session, flash)
 from app.db_functions import Chamados, session as dbsession
 
 from app.wps import *
@@ -24,8 +25,13 @@ def login():
         if res.status_code == 200:
             result = res.json()
             contrato = result['contrato']
-            session["user"] = contrato
-            return render_template('index.html', email=email, contrato=result['contrato'], cnpj=result['cnpj'], razao_social=result['razao_social'])
+            cnpj = result['cnpj']
+            razao_social = result['razao_social']
+            session["email"] = email
+            session["contrato"] = contrato
+            session["cpnj"] = cnpj
+            session["razao_social"] = razao_social
+            return render_template('index.html', email=email, contrato=contrato, cnpj=cnpj, razao_social=razao_social)
         else:
             err = 'Dados incorretos, tente novamente'
             return render_template('login.html', erro=err)
@@ -35,9 +41,12 @@ def login():
 
 @app.route('/index')
 def index():
-    if "user" in session:
-        user = session["user"]
-        return render_template('index.html', email=user)
+    if "contrato" in session:
+        email = session["email"]
+        contrato = session["contrato"]
+        cnpj = session["cpnj"]
+        razao_social = session["razao_social"]
+        return render_template('index.html', email=email, contrato=contrato, cnpj=cnpj, razao_social=razao_social)
     else:
         return redirect('login')
 
@@ -45,6 +54,9 @@ def index():
 @app.route("/logout")
 def logout():
     session.pop("user", None)
+    session.pop("email", None)
+    session.pop("contrato", None)
+    session.pop("cpnj", None)
     return redirect("/")
 
 
@@ -61,15 +73,5 @@ def novo_chamado():
     id = chamado.numero
     consulta = dbsession.query(Chamados).filter(Chamados.numero == id).first()
     dbsession.close()
-    return f'''
-        Chamado numero..... {consulta.numero}\n
-        Data Abertura...... {consulta.data_abertura}\n
-        Status............. {consulta.status}\n
-        Tipo............... {consulta.tipo}\n
-        Previsao........... {consulta.previsao}\n
-        Responsavel........ {consulta.responsavel}\n
-        Email.............. {consulta.email}\n
-        Resumo............. {consulta.resumo}\n
-        Descricao.......... {consulta.descricao}\n
-        Solucao............ {consulta.solucao}\n
-        '''
+
+    return redirect('index')
