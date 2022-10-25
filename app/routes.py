@@ -75,3 +75,8 @@ def novo_chamado():
     dbsession.close()
 
     return redirect('index')
+
+
+@app.route('/chamados')
+def chamados():
+    return render_template('chamados.html')
