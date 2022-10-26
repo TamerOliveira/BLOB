@@ -64,10 +64,15 @@ def logout():
 def novo_chamado():
     tipo = request.form.get('tipo')
     responsavel = request.form.get('responsible')
-    email = request.form.get('email')
+    email_contato = request.form.get('email')
+    email = session["email"]
+    contrato = session["contrato"]
+    cnpj = session["cpnj"]
+    razao_social = session["razao_social"]
     resumo = request.form.get('resumo')
     descricao = request.form.get('descricao')
-    chamado = Chamados(tipo, responsavel, email, resumo, descricao)
+    chamado = Chamados(tipo, responsavel, email, resumo,
+                       descricao, email_contato, contrato, cnpj, razao_social)
     dbsession.add(chamado)
     dbsession.commit()
     id = chamado.numero

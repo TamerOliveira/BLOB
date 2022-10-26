@@ -17,8 +17,12 @@ connection.execute(""" CREATE TABLE IF NOT EXISTS CHAMADOS(
                         status VARCHAR(60) NOT NULL,
                         tipo VARCHAR(60) NOT NULL,
                         previsao VARCHAR(60) NOT NULL,
-                        responsavel VARCHAR(60) NOT NULL,
+                        responsavel VARCHAR(120) NOT NULL,
                         email VARCHAR(60) NOT NULL,
+                        email_contato VARCHAR(60) NOT NULL,
+                        contrato VARCHAR(60) NOT NULL,
+                        cnpj VARCHAR(20) NOT NULL,
+                        razao_social VARCHAR(120) NOT NULL,
                         resumo VARCHAR(150) NOT NULL,
                         descricao VARCHAR(300),
                         solucao VARCHAR(300) NOT NULL)
@@ -34,13 +38,17 @@ class Chamados(Base):
     status = Column('status', String(60), nullable=False)
     tipo = Column('tipo', String(60), nullable=False)
     previsao = Column('previsao', String(60), nullable=False)
-    responsavel = Column('responsavel', String(60), nullable=False)
+    responsavel = Column('responsavel', String(120), nullable=False)
     email = Column('email', String(60), nullable=False)
-    resumo = Column('resumo', String(60), nullable=False)
+    resumo = Column('resumo', String(150), nullable=False)
     descricao = Column('descricao', String(300), nullable=True)
     solucao = Column('solucao', String(300), nullable=False)
+    email_contato = Column('email_contato', String(60), nullable=False)
+    contrato = Column('contrato', String(60), nullable=False)
+    cnpj = Column('cnpj', String(20), nullable=False)
+    razao_social = Column('razao_social', String(120), nullable=False)
 
-    def __init__(self, tipo, responsavel, email, resumo, descricao):
+    def __init__(self, tipo, responsavel, email, resumo, descricao, email_contato, contrato, cnpj, razao_social):
         self.data_abertura = str(strftime("%d-%m-%Y"))
         self.status = 'Pendente'
         self.tipo = tipo
@@ -50,3 +58,7 @@ class Chamados(Base):
         self.resumo = resumo
         self.descricao = descricao
         self.solucao = ''
+        self.email_contato = email_contato
+        self.contrato = contrato
+        self.cnpj = cnpj
+        self.razao_social = razao_social
