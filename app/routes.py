@@ -31,7 +31,7 @@ def login():
             session["contrato"] = contrato
             session["cpnj"] = cnpj
             session["razao_social"] = razao_social
-            return render_template('index.html', email=email, contrato=contrato, cnpj=cnpj, razao_social=razao_social)
+            return redirect('chamados')
         else:
             err = 'Dados incorretos, tente novamente'
             return render_template('login.html', erro=err)
@@ -39,14 +39,14 @@ def login():
     return render_template('login.html')
 
 
-@app.route('/index')
-def index():
+@app.route('/inclui_chamado')
+def inclui_chamado():
     if "contrato" in session:
         email = session["email"]
         contrato = session["contrato"]
         cnpj = session["cpnj"]
         razao_social = session["razao_social"]
-        return render_template('index.html', email=email, contrato=contrato, cnpj=cnpj, razao_social=razao_social)
+        return render_template('inclui_chamado.html', email=email, contrato=contrato, cnpj=cnpj, razao_social=razao_social)
     else:
         return redirect('login')
 
@@ -79,7 +79,7 @@ def novo_chamado():
     consulta = dbsession.query(Chamados).filter(Chamados.numero == id).first()
     dbsession.close()
 
-    return redirect('index')
+    return redirect('inclui_chamado')
 
 
 @app.route('/chamados')
