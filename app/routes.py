@@ -84,4 +84,25 @@ def novo_chamado():
 
 @app.route('/chamados')
 def chamados():
-    return render_template('chamados.html')
+    contrato = session["contrato"]
+    chamados = dbsession.query(Chamados).filter(
+        Chamados.contrato == contrato)
+    dbsession.close()
+
+    return render_template('chamados.html', chamados=chamados)
+
+
+dbsession.close()
+
+#    return f'''
+#        Chamado numero..... {chamados.numero}\n
+#        Data Abertura...... {chamados.data_abertura}\n
+#        Status............. {chamados.status}\n
+#        Tipo............... {chamados.tipo}\n
+#        Previsao........... {chamados.previsao}\n
+#        Responsavel........ {chamados.responsavel}\n
+#        Email.............. {chamados.email}\n
+#        Resumo............. {chamados.resumo}\n
+#        Descricao.......... {chamados.descricao}\n
+#        Solucao............ {chamados.solucao}\n
+#      '''

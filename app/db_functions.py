@@ -5,7 +5,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
 from time import strftime
 
-engine = sqlalchemy.create_engine("sqlite:///app/database.db")
+engine = sqlalchemy.create_engine(
+    'sqlite:///app/database.db', connect_args={'check_same_thread': False})
 connection = engine.connect()
 
 Base = declarative_base(engine)
