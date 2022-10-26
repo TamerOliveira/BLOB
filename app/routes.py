@@ -84,12 +84,14 @@ def novo_chamado():
 
 @app.route('/chamados')
 def chamados():
-    contrato = session["contrato"]
-    chamados = dbsession.query(Chamados).filter(
-        Chamados.contrato == contrato)
-    dbsession.close()
-
-    return render_template('chamados.html', chamados=chamados)
+    if "contrato" in session:
+        contrato = session["contrato"]
+        chamados = dbsession.query(Chamados).filter(
+            Chamados.contrato == contrato)
+        dbsession.close()
+        return render_template('chamados.html', chamados=chamados)
+    else:
+        return redirect('login')
 
 
 dbsession.close()
