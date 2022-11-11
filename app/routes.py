@@ -82,6 +82,19 @@ def novo_chamado():
     return redirect('inclui_chamado')
 
 
+@app.route('/altera', methods=['GET'])
+def altera():
+    if "contrato" in session:
+        contrato = session["contrato"]
+        numero = request.args.get('id')
+        chamado = dbsession.query(Chamados).filter(
+            Chamados.numero == numero, Chamados.contrato == contrato).first()
+        dbsession.close()
+        return render_template('altera_chamado.html', chamado=chamado)
+    else:
+        return redirect('login')
+
+
 @app.route('/chamados')
 def chamados():
     if "contrato" in session:
