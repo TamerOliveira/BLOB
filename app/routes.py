@@ -25,7 +25,7 @@ def login():
             "username": email,
             "password": password}
 
-        res = wpslogin(data)
+        res = consultar_contrato(data)
 
         if res.status_code == 200:
             result = res.json()

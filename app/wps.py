@@ -2,7 +2,7 @@ import requests
 import json
 
 
-def wpslogin(data):
+def consultar_contrato(data):
 
     url = 'https://wps-login.herokuapp.com/login'
 
