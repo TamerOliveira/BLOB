@@ -2,6 +2,7 @@ from app import app
 from flask import (Flask, render_template, request,
                    redirect, url_for, session, flash)
 from app.db_functions import Chamados, session as dbsession
+from sqlalchemy import update
 
 from app.wps import *
 
@@ -12,6 +13,10 @@ app.config['SESSION_TYPE'] = 'filesystem'
 @app.route('/')
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    session.pop("user", None)
+    session.pop("email", None)
+    session.pop("contrato", None)
+    session.pop("cpnj", None)
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
@@ -39,19 +44,47 @@ def login():
     return render_template('login.html')
 
 
-@app.route('/inclui_chamado')
-def inclui_chamado():
+@app.route('/abrir_chamado')
+def abrir_chamado():
     if "contrato" in session:
         email = session["email"]
         contrato = session["contrato"]
         cnpj = session["cpnj"]
         razao_social = session["razao_social"]
-        return render_template('inclui_chamado.html', email=email, contrato=contrato, cnpj=cnpj, razao_social=razao_social)
+        return render_template('abrir_chamado.html', email=email, contrato=contrato, cnpj=cnpj, razao_social=razao_social)
     else:
         return redirect('login')
 
 
-@app.route("/logout")
+@app.route('/atualizar_chamado', methods=['POST'])
+def atualizar_chamado():
+    numero = request.form.get('num')
+    resumo = request.form.get('resumo')
+    descricao = request.form.get('descricao')
+
+    dbsession.query(Chamados).filter(Chamados.numero == numero).update(
+        {Chamados.descricao: descricao, Chamados.resumo: resumo}, synchronize_session=False)
+    dbsession.commit()
+
+    dbsession.close()
+
+    return redirect('chamados')
+
+
+@app.route('/encerrar_chamado', methods=['GET'])
+def encerrar_chamado():
+    numero = request.args.get('id')
+
+    dbsession.query(Chamados).filter(Chamados.numero == numero).update(
+        {Chamados.status: 'Cancelado'}, synchronize_session=False)
+    dbsession.commit()
+
+    dbsession.close()
+
+    return redirect('chamados')
+
+
+@ app.route("/logout")
 def logout():
     session.pop("user", None)
     session.pop("email", None)
@@ -60,7 +93,7 @@ def logout():
     return redirect("/")
 
 
-@app.route('/novo_chamado', methods=['POST'])
+@ app.route('/novo_chamado', methods=['POST'])
 def novo_chamado():
     tipo = request.form.get('tipo')
     responsavel = request.form.get('responsible')
@@ -79,10 +112,10 @@ def novo_chamado():
     consulta = dbsession.query(Chamados).filter(Chamados.numero == id).first()
     dbsession.close()
 
-    return redirect('inclui_chamado')
+    return redirect('abrir_chamado')
 
 
-@app.route('/altera', methods=['GET'])
+@ app.route('/altera', methods=['GET'])
 def altera():
     if "contrato" in session:
         contrato = session["contrato"]
@@ -95,8 +128,8 @@ def altera():
         return redirect('login')
 
 
-@app.route('/chamados')
-def chamados():
+@ app.route('/chamados')
+def consultar_chamados():
     if "contrato" in session:
         contrato = session["contrato"]
         chamados = dbsession.query(Chamados).filter(
