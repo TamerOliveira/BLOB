@@ -38,7 +38,7 @@ def login():
             session["razao_social"] = razao_social
             return redirect('chamados')
         else:
-            err = 'Dados incorretos, tente novamente'
+            err = 'Dados incorretos, tente novamente.'
             return render_template('login.html', erro=err)
 
     return render_template('login.html')
@@ -141,16 +141,3 @@ def consultar_chamados():
 
 
 dbsession.close()
-
-#    return f'''
-#        Chamado numero..... {chamados.numero}\n
-#        Data Abertura...... {chamados.data_abertura}\n
-#        Status............. {chamados.status}\n
-#        Tipo............... {chamados.tipo}\n
-#        Previsao........... {chamados.previsao}\n
-#        Responsavel........ {chamados.responsavel}\n
-#        Email.............. {chamados.email}\n
-#        Resumo............. {chamados.resumo}\n
-#        Descricao.......... {chamados.descricao}\n
-#        Solucao............ {chamados.solucao}\n
-#      '''
