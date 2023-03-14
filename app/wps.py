@@ -4,8 +4,8 @@ import json
 
 def consultar_contrato(data):
 
-    url = 'https://wps-login.herokuapp.com/login'
+    url = 'http://127.0.0.1:81'
 
-    request = requests.post(url=url, json=data)
+    request = requests.post(url=url, verify=False, json=data)
 
     return request
