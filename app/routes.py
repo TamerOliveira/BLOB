@@ -21,17 +21,10 @@ def login():
         email = request.form['email']
         password = request.form['password']
 
-        data = {
-            "username": email,
-            "password": password}
-
-        res = consultar_contrato(data)
-
-        if res.status_code == 200:
-            result = res.json()
-            contrato = result['contrato']
-            cnpj = result['cnpj']
-            razao_social = result['razao_social']
+        if email == 'wps@wps.com' and password == '1234':
+            contrato = "12345678912"
+            cnpj = "22.333.333/4444-22"
+            razao_social = "Empresa1"
             session["email"] = email
             session["contrato"] = contrato
             session["cpnj"] = cnpj
@@ -42,6 +35,28 @@ def login():
             return render_template('login.html', erro=err)
 
     return render_template('login.html')
+
+    #     data = {
+    #         "username": email,
+    #         "password": password}
+
+    #     res = consultar_contrato(data)
+
+    #     if res.status_code == 200:
+    #         result = res.json()
+    #         contrato = result['contrato']
+    #         cnpj = result['cnpj']
+    #         razao_social = result['razao_social']
+    #         session["email"] = email
+    #         session["contrato"] = contrato
+    #         session["cpnj"] = cnpj
+    #         session["razao_social"] = razao_social
+    #         return redirect('chamados')
+    #     else:
+    #         err = 'Dados incorretos, tente novamente.'
+    #         return render_template('login.html', erro=err)
+
+    # return render_template('login.html')
 
 
 @app.route('/abrir_chamado')
