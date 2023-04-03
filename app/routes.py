@@ -1,7 +1,7 @@
 from app import app
 from flask import (Flask, render_template, request,
                    redirect, url_for, session, flash)
-from app.db_functions import Chamados, session as dbsession
+from app.db_functions import Chamados, Comentarios, session as dbsession
 from sqlalchemy import update
 
 from app.wps import *
@@ -86,6 +86,21 @@ def atualizar_chamado():
     return redirect('chamados')
 
 
+@app.route('/inclui_comentario', methods=['POST'])
+def incluir_comentario():
+    chamado = request.form.get('num')
+    detalhes = request.form.get('detalhes')
+    responsavel = request.form.get('resp')
+
+    comentarios = Comentarios(chamado, detalhes, responsavel)
+    dbsession.add(comentarios)
+    dbsession.commit()
+
+    dbsession.close()
+
+    return redirect('chamados')
+
+
 @app.route('/encerrar_chamado', methods=['GET'])
 def encerrar_chamado():
     numero = request.args.get('id')
@@ -137,8 +152,10 @@ def altera():
         numero = request.args.get('id')
         chamado = dbsession.query(Chamados).filter(
             Chamados.numero == numero, Chamados.contrato == contrato).first()
+        comentarios = dbsession.query(Comentarios).filter(
+            Comentarios.chamado == numero).all()
         dbsession.close()
-        return render_template('altera_chamado.html', chamado=chamado)
+        return render_template('altera_chamado.html', chamado=chamado, comentarios=comentarios)
     else:
         return redirect('login')
 

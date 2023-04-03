@@ -1,6 +1,6 @@
 from ctypes.wintypes import PINT
 import sqlalchemy
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
 from time import strftime
@@ -13,7 +13,7 @@ Base = declarative_base(engine)
 session = Session()
 
 connection.execute(""" CREATE TABLE IF NOT EXISTS CHAMADOS(
-                        numero INTEGER PRIMARY KEY,
+                        numero INTEGER NOT NULL,
                         data_abertura VARCHAR(60) NOT NULL,
                         status VARCHAR(60) NOT NULL,
                         tipo VARCHAR(60) NOT NULL,
@@ -26,10 +26,20 @@ connection.execute(""" CREATE TABLE IF NOT EXISTS CHAMADOS(
                         razao_social VARCHAR(120) NOT NULL,
                         resumo VARCHAR(150) NOT NULL,
                         descricao VARCHAR(300),
-                        solucao VARCHAR(300) NOT NULL)
+                        solucao VARCHAR(300) NOT NULL,
+                        PRIMARY KEY(numero))
                         """)
 
-# Classe da tabela de CHAMADOS
+# Classe da tabela de COMENTARIOS
+
+connection.execute(""" CREATE TABLE IF NOT EXISTS COMENTARIOS(
+                        comentario INTEGER NOT NULL,
+                        chamado INTEGER NOT NULL,
+                        detalhes VARCHAR(300) NOT NULL,
+                        responsavel VARCHAR(120) NOT NULL,
+                        PRIMARY KEY (comentario),
+                        FOREIGN KEY (chamado) REFERENCES CHAMADOS(numero) )
+                        """)
 
 
 class Chamados(Base):
@@ -63,3 +73,17 @@ class Chamados(Base):
         self.contrato = contrato
         self.cnpj = cnpj
         self.razao_social = razao_social
+
+
+class Comentarios(Base):
+    __tablename__ = 'COMENTARIOS'
+    comentario = Column('comentario', Integer,
+                        primary_key=True, autoincrement=True)
+    chamado = Column('chamado', Integer, ForeignKey("CHAMADOS.numero"))
+    detalhes = Column('detalhes', String(300), nullable=False)
+    responsavel = Column('responsavel', String(120), nullable=False)
+
+    def __init__(self, chamado, detalhes, responsavel):
+        self.chamado = chamado
+        self.detalhes = detalhes
+        self.responsavel = responsavel
