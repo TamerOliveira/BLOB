@@ -9,6 +9,21 @@
 
     <!-- Style -->
     <link rel="stylesheet" href="../static/assets/css/chamados/style.css">
+    <style>
+        .dataTables_filter {
+            font-size: 14px;
+            color: white
+        }
+
+
+        .dataTables_filter input {
+            width: 300px;
+            padding: 6px 16px;
+            margin: 2px 2px;
+            box-sizing: border-box;
+        }
+    </style>
+
 </head>
 
 {% extends 'base.html' %}
@@ -71,7 +86,10 @@
             info: false,
             order: [[1, 'asc']],
             "language": {
-                search: "Buscar:&nbsp;&nbsp;",
+                search: "Pesquisar:&nbsp;&nbsp;",
+                zeroRecords: "Nenhum registro encontrado",
+                infoEmpty: "Nenhum registro disponível",
+                searchPlaceholder: "Informe número, responsável ou status"
             }
         });
     });
