@@ -23,7 +23,7 @@
 
         <div class="table-responsive">
 
-            <table class="table table-striped custom-table">
+            <table id="chamados" class="table table-striped custom-table" data-order='[[ 1, "desc" ]]'>
                 <thead>
                     <tr>
 
@@ -60,5 +60,21 @@
 <script src="../static/assets/js/popper.min.js"></script>
 <script src="../static/assets/js/bootstrap.min.js"></script>
 <script src="../static/assets/js/main.js"></script>
+
+<link rel="//cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+<script src="//cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#chamados').DataTable({
+            paging: false,
+            ordering: false,
+            info: false,
+            order: [[1, 'asc']],
+            "language": {
+                search: "Buscar:&nbsp;&nbsp;",
+            }
+        });
+    });
+</script>
 
 {% endblock %}

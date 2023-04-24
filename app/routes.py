@@ -1,10 +1,13 @@
 from app import app
+
 from flask import (Flask, render_template, request,
                    redirect, url_for, session, flash)
 from app.db_functions import Chamados, Comentarios, session as dbsession
 from sqlalchemy import update
 
+
 from app.wps import *
+
 
 app.secret_key = 'super secret key'
 app.config['SESSION_TYPE'] = 'filesystem'
