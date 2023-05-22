@@ -103,6 +103,26 @@ def incluir_comentario():
 
     return redirect('chamados')
 
+@ app.route('/incluir_comentarioexterno', methods=['POST'])
+def incluir_comentarioexterno():
+        
+        request_data = request.get_json()
+
+        chamado1 = request_data['id']
+        detalhes = request_data['detalhes']
+        responsavel = request_data['responsavel']
+
+
+
+        comentarios = Comentarios(chamado1, detalhes, responsavel)
+        dbsession.add(comentarios)
+        dbsession.commit()
+
+        dbsession.close()
+        return 'Inserido com sucesso!'
+
+
+
 
 @app.route('/encerrar_chamado', methods=['GET'])
 def encerrar_chamado():
@@ -161,6 +181,7 @@ def altera():
         return render_template('altera_chamado.html', chamado=chamado, comentarios=comentarios)
     else:
         return redirect('login')
+
 
 
 @ app.route('/chamados')
