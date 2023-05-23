@@ -1,7 +1,7 @@
 from app import app
 
 from flask import (Flask, render_template, request,
-                   redirect, url_for, session, flash)
+                   redirect, url_for, session, flash, jsonify)
 from app.db_functions import Chamados, Comentarios, session as dbsession
 from sqlalchemy import update
 
@@ -108,18 +108,36 @@ def incluir_comentarioexterno():
         
         request_data = request.get_json()
 
-        chamado1 = request_data['id']
-        detalhes = request_data['detalhes']
-        responsavel = request_data['responsavel']
+        try:
+            chamado1 = request_data['id']
+            detalhes = request_data['detalhes']
+            responsavel = request_data['responsavel']
+        except KeyError:
+            retorno = {
+            'return': 'json inválido',
+            'status_code': '400 Bad Request'
+        }
+            return jsonify(retorno), 400
+        else:
+            consultachamado = dbsession.query(Chamados).filter(Chamados.numero == chamado1).first()
+            if consultachamado == None:
+                retorno = {
+                    'return': 'chamado inválido',
+                    'status_code': '400 Bad Request'
+                }
+                return jsonify(retorno), 400
 
+            comentarios = Comentarios(chamado1, detalhes, responsavel)
+            dbsession.add(comentarios)
+            dbsession.commit()
 
+            dbsession.close()
 
-        comentarios = Comentarios(chamado1, detalhes, responsavel)
-        dbsession.add(comentarios)
-        dbsession.commit()
-
-        dbsession.close()
-        return 'Inserido com sucesso!'
+            retorno = {
+                'return': 'Inserido com sucesso!',
+                'status_code': '200 Ok'
+            }
+            return jsonify(retorno), 200
 
 
 
