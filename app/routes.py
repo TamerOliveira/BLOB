@@ -1,12 +1,10 @@
 from app import app
-
 from flask import (Flask, render_template, request,
                    redirect, url_for, session, flash, jsonify)
 from app.db_functions import Chamados, Comentarios, session as dbsession
 from sqlalchemy import update
-
-
 from app.wps import *
+from app.sendemails import Email
 
 
 app.secret_key = 'super secret key'
@@ -76,14 +74,35 @@ def abrir_chamado():
 
 @app.route('/atualizar_chamado', methods=['POST'])
 def atualizar_chamado():
-    numero = request.form.get('num')
+    id = request.form.get('num')
     resumo = request.form.get('resumo')
     descricao = request.form.get('descricao')
 
-    dbsession.query(Chamados).filter(Chamados.numero == numero).update(
+    consulta = dbsession.query(Chamados).filter(Chamados.numero == id).first()
+    antesresumo = consulta.resumo
+    antesdescricao = consulta.descricao
+
+    dbsession.query(Chamados).filter(Chamados.numero == id).update(
         {Chamados.descricao: descricao, Chamados.resumo: resumo}, synchronize_session=False)
     dbsession.commit()
 
+    #Envio de email
+    
+    body = f"""
+Chamado de {consulta.tipo} foi alterado
+Numero: {id}
+------------------------------------
+Resumo: {antesresumo}
+Detalhes:
+{antesdescricao}
+------------------------------------
+Nova informação:
+Resumo: {resumo}
+Detalhes:
+{descricao}
+"""
+    email = Email(consulta.email_contato, f'WPS - Chamado Alterado {id}', body)
+    email.enviar()
     dbsession.close()
 
     return redirect('chamados')
@@ -91,17 +110,31 @@ def atualizar_chamado():
 
 @app.route('/inclui_comentario', methods=['POST'])
 def incluir_comentario():
-    chamado = request.form.get('num')
+    id = request.form.get('num')
     detalhes = request.form.get('detalhes')
     responsavel = request.form.get('resp')
 
-    comentarios = Comentarios(chamado, detalhes, responsavel)
+    comentarios = Comentarios(id, detalhes, responsavel)
     dbsession.add(comentarios)
     dbsession.commit()
+
+    #Envio de email
+    consulta = dbsession.query(Chamados).filter(Chamados.numero == id).first()
+
+    body = f"""
+Chamado de {consulta.tipo} foi alterado
+Numero: {id}
+------------------------------------
+Responsável: {responsavel}
+Novo comentário: {detalhes}
+"""
+    email = Email(consulta.email_contato, f'WPS - Comentário Incluido {id}', body)
+    email.enviar()
 
     dbsession.close()
 
     return redirect('chamados')
+
 
 @ app.route('/incluir_comentarioexterno', methods=['POST'])
 def incluir_comentarioexterno():
@@ -109,7 +142,7 @@ def incluir_comentarioexterno():
         request_data = request.get_json()
 
         try:
-            chamado1 = request_data['id']
+            chamado = request_data['id']
             detalhes = request_data['detalhes']
             responsavel = request_data['responsavel']
         except KeyError:
@@ -119,7 +152,7 @@ def incluir_comentarioexterno():
         }
             return jsonify(retorno), 400
         else:
-            consultachamado = dbsession.query(Chamados).filter(Chamados.numero == chamado1).first()
+            consultachamado = dbsession.query(Chamados).filter(Chamados.numero == chamado).first()
             if consultachamado == None:
                 retorno = {
                     'return': 'chamado inválido',
@@ -127,9 +160,20 @@ def incluir_comentarioexterno():
                 }
                 return jsonify(retorno), 400
 
-            comentarios = Comentarios(chamado1, detalhes, responsavel)
+            comentarios = Comentarios(chamado, detalhes, responsavel)
             dbsession.add(comentarios)
             dbsession.commit()
+
+            #Envio de email
+            body = f"""
+Chamado de {consultachamado.tipo} foi alterado
+Numero: {chamado}
+------------------------------------
+Responsável: {responsavel}
+Novo comentário: {detalhes}
+"""
+            email = Email(consultachamado.email_contato, f'WPS - Comentário Incluido {chamado}', body)
+            email.enviar()
 
             dbsession.close()
 
@@ -144,12 +188,36 @@ def incluir_comentarioexterno():
 
 @app.route('/encerrar_chamado', methods=['GET'])
 def encerrar_chamado():
-    numero = request.args.get('id')
+    id = request.args.get('id')
 
-    dbsession.query(Chamados).filter(Chamados.numero == numero).update(
+    consulta = dbsession.query(Chamados).filter(Chamados.numero == id).first()
+    id = consulta.numero
+    tipo = consulta.tipo
+    responsavel = consulta.responsavel
+    data_abertura = consulta.data_abertura
+    resumo = consulta.resumo
+    descricao = consulta.descricao
+    email_contato = consulta.email_contato
+
+    dbsession.query(Chamados).filter(Chamados.numero == id).update(
         {Chamados.status: 'Cancelado'}, synchronize_session=False)
     dbsession.commit()
 
+    #Envio de email
+
+    body = f"""
+Chamado de {tipo} foi encerrado
+Numero: {id}
+Responsável: {responsavel}
+Data abertura: {data_abertura}
+Resumo: {resumo}
+Detalhes:
+{descricao}
+
+"""
+    email = Email(email_contato, f'WPS - Chamado encerrado {id}', body)
+    email.enviar()
+    
     dbsession.close()
 
     return redirect('chamados')
@@ -181,6 +249,19 @@ def novo_chamado():
     dbsession.commit()
     id = chamado.numero
     consulta = dbsession.query(Chamados).filter(Chamados.numero == id).first()
+
+    #Envio de email
+    body = f"""
+Chamado de {tipo} aberto com a WPS
+Numero: {id}                
+Responsável: {responsavel}
+Data abertura: {consulta.data_abertura}
+Resumo: {resumo}
+Detalhes:
+{descricao}
+"""
+    email = Email(email_contato, f'WPS - Chamado aberto {id}', body)
+    email.enviar()
     dbsession.close()
 
     return redirect('abrir_chamado')
@@ -196,6 +277,7 @@ def altera():
         comentarios = dbsession.query(Comentarios).filter(
             Comentarios.chamado == numero).all()
         dbsession.close()
+        
         return render_template('altera_chamado.html', chamado=chamado, comentarios=comentarios)
     else:
         return redirect('login')
